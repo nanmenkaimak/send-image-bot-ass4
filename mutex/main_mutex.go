@@ -46,7 +46,6 @@ func handler(ctx context.Context, b *bot.Bot, update *models.Update) {
 			}
 		}(update.Message.Chat.ID)
 
-		mutex.Unlock()
 	}
-
+	mutex.Unlock()
 }
