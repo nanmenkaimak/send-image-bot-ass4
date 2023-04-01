@@ -2,14 +2,13 @@ package main
 
 import (
 	"context"
-	bot "github.com/go-telegram/bot"
+	"github.com/go-telegram/bot"
 	"github.com/go-telegram/bot/models"
 	"github.com/nanmenkaimak/send-image-bot-ass4/keys"
 	"github.com/nanmenkaimak/send-image-bot-ass4/random"
 	"log"
 	"os"
 	"os/signal"
-	"sync"
 )
 
 func main() {
@@ -25,12 +24,13 @@ func main() {
 }
 
 func handler(ctx context.Context, b *bot.Bot, update *models.Update) {
-	var mutex sync.Mutex
+	message := make(chan bool, 1)
 
 	if update.Message.Text == "image" || update.Message.Text == "/image" {
-		mutex.Lock()
+		message <- true
 
 		go func(chatID int64) {
+			defer func() { <-message }()
 
 			photo, err := random.RandomPhoto(keys.AccessKey())
 			if err != nil {
@@ -46,7 +46,6 @@ func handler(ctx context.Context, b *bot.Bot, update *models.Update) {
 			}
 		}(update.Message.Chat.ID)
 
-		mutex.Unlock()
 	}
 
 }
